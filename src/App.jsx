@@ -1,29 +1,28 @@
-import About from "./Components/About"
-import Appointment from "./Components/Appointment"
-import Feature from "./Components/Feature"
-import Footer from "./Components/Footer"
-import Header from "./Components/Header"
+import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import Nav from "./Components/Nav"
-import Service from "./Components/Service"
-import TeamStart from "./Components/TeamStart"
-import Testimonial from "./Components/Testimonial"
+import Footer from "./Components/Footer"
 import Topbar from "./Components/Topbar"
+import Home from './Components/Page/Home';
+import AboutPage from './Components/Page/AboutPage';
+import AppointmentPage from './Components/Page/AppointmentPage';
+import ServicePage from './Components/Page/ServicePage';
+
 
 
 function App() {
   return (
     <>
-
-    <Topbar />
-  <Nav />
-  <Header />
-  <About />
-  <Feature />
-  <TeamStart />
-  <Footer />
-  <Testimonial />
-  <Appointment />
-  <Service />
+      <Topbar />
+      <Nav />
+      <Router>
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/about" element={<AboutPage />} />
+          <Route path="/appointment" element={<AppointmentPage />} />
+          <Route path="/service" element={<ServicePage />} />
+        </Routes>
+      </Router>
+      <Footer />
     </>
   )
 }

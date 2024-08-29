@@ -3,7 +3,7 @@ import img3 from "../assets/img/feature.jpg"
 export default function Feature() {
     return (
         <div>
-            <div className="container-fluid bg-primary overflow-hidden px-lg-0" style={{ margin: "6rem 0;" }}>
+            <div className="container-fluid bg-primary overflow-hidden px-lg-0" style={{ margin: "6rem 0" }}>
                 <div className="container feature px-lg-0">
                     <div className="row g-0 mx-lg-0">
                         <div className="col-lg-6 feature-text py-5 wow fadeIn" data-wow-delay="0.1s">
@@ -14,7 +14,7 @@ export default function Feature() {
                                 <div className="row g-4">
                                     <div className="col-6">
                                         <div className="d-flex align-items-center">
-                                            <div className="d-flex flex-shrink-0 align-items-center justify-content-center rounded-circle bg-light" style={{ width: "55px", height: "55px;" }}>
+                                            <div className="d-flex flex-shrink-0 align-items-center justify-content-center rounded-circle bg-light" style={{ width: "55px", height: "55px" }}>
                                                 <i className="fa fa-user-md text-primary"></i>
                                             </div>
                                             <div className="ms-4">
