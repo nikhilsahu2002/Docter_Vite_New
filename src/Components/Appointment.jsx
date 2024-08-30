@@ -3,6 +3,8 @@ import { getFirestore, collection, addDoc } from 'firebase/firestore';
 import { app } from '../../Firebase';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 export default function Appointment() {
     const [formData, setFormData] = useState({
@@ -35,18 +37,79 @@ export default function Appointment() {
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
+            // Add appointment to Firestore
             const docRef = await addDoc(collection(db, 'appointments'), formData);
-            alert('Appointment booked successfully');
+            toast.success('Appointment booked successfully');
             console.log('Document written with ID: ', docRef.id);
+
+            // Prepare email data
+            const emailData = {
+                sender: {
+                    name: "Nikhil Sahu",
+                    email: "death1233freak@gmail.com" // Ensure this email is authorized
+                },
+                to: [
+                    {
+                        email: formData.email,
+                        name: formData.name
+                    }
+                ],
+                templateId: 1, // Replace with your template ID
+                params: {
+                    name: formData.name,
+                    appointmentDate: formData.date, // Example variable; adjust as needed
+                    Slot: formData.time
+                }
+            };
+
+            // Send email using fetch
+            const emailResponse = await fetch('https://api.brevo.com/v3/smtp/email', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'api-key': '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' // Replace with your actual Brevo API key
+                },
+                body: JSON.stringify(emailData)
+            });
+
+            if (!emailResponse.ok) {
+                const errorData = await emailResponse.json();
+                toast.error(`Failed to send email: ${errorData.message}`);
+                console.error('Failed to send email', errorData);
+            }
+
+            // Prepare SMS data
+            // const smsData = {
+            //     sender: 'NikhilSahu', // Replace with your sender name
+            //     recipient: formData.mobile,
+            //     content: `Appointment Booked\nDear ${formData.name},\n\nThank you for scheduling an appointment with us. We’re excited to have you join us on:\n\nDate: ${formData.date.toLocaleDateString()}\n\nBest regards,\nYour Company`
+            // };
+
+            // // Send SMS using fetch
+            // const smsResponse = await fetch('https://api.brevo.com/v3/transactionalSMS/sms', {
+            //     method: 'POST',
+            //     headers: {
+            //         'Content-Type': 'application/json',
+            //         'api-key': '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' // Replace with your actual Brevo API key
+            //     },
+            //     body: JSON.stringify(smsData)
+            // });
+
+            // if (!smsResponse.ok) {
+            //     const errorData = await smsResponse.json();
+            //     // toast.error(`Failed to send SMS: ${errorData.message}`);
+            //     console.error('Failed to send SMS', errorData);
+            // } else {
+            //     // toast.success('SMS sent successfully');
+            // }
+
         } catch (e) {
+            toast.error('Failed to book appointment, please try again.');
             console.error('Error adding document: ', e);
-            alert('Failed to book appointment, please try again.');
         }
     };
 
     const timeSlots = [
-        "09:00 AM - 09:30 AM",
-        "09:30 AM - 10:00 AM",
         "10:00 AM - 10:30 AM",
         "10:30 AM - 11:00 AM",
         "11:00 AM - 11:30 AM",
@@ -63,6 +126,7 @@ export default function Appointment() {
 
     return (
         <div>
+            <ToastContainer />
             <div className="container-xxl py-5">
                 <div className="container">
                     <div className="row g-5">
@@ -94,13 +158,13 @@ export default function Appointment() {
                                 <form onSubmit={handleSubmit}>
                                     <div className="row g-3">
                                         <div className="col-12 col-sm-6">
-                                            <input type="text" name="name" className="form-control border-0" placeholder="Your Name" style={{ height: "55px" }} value={formData.name} onChange={handleInputChange} />
+                                            <input required type="text" name="name" className="form-control border-0" placeholder="Your Name" style={{ height: "55px" }} value={formData.name} onChange={handleInputChange} />
                                         </div>
                                         <div className="col-12 col-sm-6">
-                                            <input type="email" name="email" className="form-control border-0" placeholder="Your Email" style={{ height: "55px" }} value={formData.email} onChange={handleInputChange} />
+                                            <input required type="email" name="email" className="form-control border-0" placeholder="Your Email" style={{ height: "55px" }} value={formData.email} onChange={handleInputChange} />
                                         </div>
                                         <div className="col-12 col-sm-6">
-                                            <input type="text" name="mobile" className="form-control border-0" placeholder="Your Mobile" style={{ height: "55px" }} value={formData.mobile} onChange={handleInputChange} />
+                                            <input required type="text" name="mobile" className="form-control border-0" placeholder="Your Mobile" style={{ height: "55px" }} value={formData.mobile} onChange={handleInputChange} />
                                         </div>
                                         <div className="col-12 col-sm-6">
                                             <select name="doctor" className="form-select border-0" style={{ height: "55px" }} value={formData.doctor} onChange={handleInputChange}>
