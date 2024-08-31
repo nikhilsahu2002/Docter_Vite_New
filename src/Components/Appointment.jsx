@@ -5,7 +5,6 @@ import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import Razorpay from 'razorpay';
 
 export default function Appointment() {
     const [formData, setFormData] = useState({
@@ -13,8 +12,8 @@ export default function Appointment() {
         email: '',
         mobile: '',
         doctor: '',
-        date: new Date(),
-        time: '',
+        date: new Date(), // Default to current date
+        time: '', // Time slot will be selected here
         problem: ''
     });
 
@@ -35,35 +34,6 @@ export default function Appointment() {
         });
     };
 
-    const handlePayment = (appointmentId) => {
-        const options = {
-            key: "YOUR_RAZORPAY_KEY_ID", // Replace with your Razorpay key ID
-            amount: 1000 * 100, // Example amount in paise (1000 INR)
-            currency: "INR",
-            name: "Klinik",
-            description: "Appointment Booking Payment",
-            handler: function (response) {
-                toast.success('Payment successful');
-                console.log(response);
-                // You can update your database with payment info here if needed
-            },
-            prefill: {
-                name: formData.name,
-                email: formData.email,
-                contact: formData.mobile
-            },
-            notes: {
-                appointmentId: appointmentId
-            },
-            theme: {
-                color: "#3399cc"
-            }
-        };
-
-        const razorpay = new Razorpay(options);
-        razorpay.open();
-    };
-
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
@@ -72,14 +42,73 @@ export default function Appointment() {
             toast.success('Appointment booked successfully');
             console.log('Document written with ID: ', docRef.id);
 
-            // Trigger payment
-            handlePayment(docRef.id);
+            // Prepare email data
+            const emailData = {
+                sender: {
+                    name: "Nikhil Sahu",
+                    email: "death1233freak@gmail.com" // Ensure this email is authorized
+                },
+                to: [
+                    {
+                        email: formData.email,
+                        name: formData.name
+                    }
+                ],
+                templateId: 1, // Replace with your template ID
+                params: {
+                    name: formData.name,
+                    appointmentDate: formData.date, // Example variable; adjust as needed
+                    Slot: formData.time
+                }
+            };
+
+            // Send email using fetch
+            const emailResponse = await fetch('https://api.brevo.com/v3/smtp/email', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'api-key': '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' // Replace with your actual Brevo API key
+                },
+                body: JSON.stringify(emailData)
+            });
+
+            if (!emailResponse.ok) {
+                const errorData = await emailResponse.json();
+                toast.error(`Failed to send email: ${errorData.message}`);
+                console.error('Failed to send email', errorData);
+            }
+            if (emailResponse) {
+                const options = {
+                    key: "rzp_test_xj7q4CaIpc5ka1", // Your Razorpay key ID
+                    amount: 1000 * 100, // Example amount in paise (1000 INR)
+                    currency: "INR",
+                    name: "Klinik",
+                    description: "Appointment Booking Payment",
+                    handler: function (response) {
+                        toast.success('Payment successful');
+                        console.log(response);
+                    },
+                    prefill: {
+                        name: formData.name,
+                        email: formData.email,
+                        contact: formData.mobile
+                    },
+                    theme: {
+                        color: "#3399cc"
+                    }
+                };
+
+                // Use Razorpay from the global object
+                const razorpay = new window.Razorpay(options);
+                razorpay.open();
+            }
 
         } catch (e) {
             toast.error('Failed to book appointment, please try again.');
             console.error('Error adding document: ', e);
         }
     };
+
 
     const timeSlots = [
         "10:00 AM - 10:30 AM",
