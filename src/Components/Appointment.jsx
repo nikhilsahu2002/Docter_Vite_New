@@ -41,6 +41,7 @@ export default function Appointment() {
             const docRef = await addDoc(collection(db, 'appointments'), formData);
             toast.success('Appointment booked successfully');
             console.log('Document written with ID: ', docRef.id);
+            const meetingLink = `https://meet.jit.si/${formData.email}-${formData.name}-${new Date().getTime()}`;
 
             // Prepare email data
             const emailData = {
@@ -58,7 +59,8 @@ export default function Appointment() {
                 params: {
                     name: formData.name,
                     appointmentDate: formData.date, // Example variable; adjust as needed
-                    Slot: formData.time
+                    Slot: formData.time,
+                    MeetingLink: meetingLink,
                 }
             };
 
